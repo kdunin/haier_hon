@@ -14,7 +14,7 @@ from pyhon.parameter.range import HonParameterRange
 
 from .const import DOMAIN
 from .entity import HonEntity
-from .util import unique_entities
+from .util import sync_command, unique_entities
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -554,7 +554,7 @@ class HonControlSwitchEntity(HonEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         _LOGGER.debug("Control switch %s turning ON", self._attr_unique_id)
-        self._device.sync_command(self.entity_description.turn_on_key, "settings")
+        sync_command(self._device, self.entity_description.turn_on_key, "settings")
         self.coordinator.async_set_updated_data({})
         await self._device.commands[self.entity_description.turn_on_key].send()
         self._device.attributes[self.entity_description.key] = True
@@ -563,7 +563,7 @@ class HonControlSwitchEntity(HonEntity, SwitchEntity):
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         _LOGGER.debug("Control switch %s turning OFF", self._attr_unique_id)
-        self._device.sync_command(self.entity_description.turn_off_key, "settings")
+        sync_command(self._device, self.entity_description.turn_off_key, "settings")
         self.coordinator.async_set_updated_data({})
         await self._device.commands[self.entity_description.turn_off_key].send()
         self._device.attributes[self.entity_description.key] = False

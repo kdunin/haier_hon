@@ -27,6 +27,7 @@ from pyhon.parameter.range import HonParameterRange
 
 from .const import HON_HVAC_MODE, HON_FAN, DOMAIN, HON_HVAC_PROGRAM
 from .entity import HonEntity
+from .util import sync_command
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -199,7 +200,7 @@ class HonACClimateEntity(HonEntity, ClimateEntity):
         self._attr_hvac_mode = hvac_mode
         if hvac_mode == HVACMode.OFF:
             await self._device.commands["stopProgram"].send()
-            self._device.sync_command("stopProgram", "settings")
+            sync_command(self._device, "stopProgram", "settings")
         else:
             self._device.settings["settings.onOffStatus"].value = "1"
             setting = self._device.settings["settings.machMode"]
@@ -214,11 +215,11 @@ class HonACClimateEntity(HonEntity, ClimateEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         await self._device.commands["startProgram"].send()
-        self._device.sync_command("startProgram", "settings")
+        sync_command(self._device, "startProgram", "settings")
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self._device.commands["stopProgram"].send()
-        self._device.sync_command("stopProgram", "settings")
+        sync_command(self._device, "stopProgram", "settings")
 
     @property
     def preset_mode(self) -> str | None:
@@ -229,7 +230,7 @@ class HonACClimateEntity(HonEntity, ClimateEntity):
         """Set the new preset mode."""
         if program := self._device.settings.get("startProgram.program"):
             program.value = preset_mode
-        self._device.sync_command("startProgram", "settings")
+        sync_command(self._device, "startProgram", "settings")
         self._set_temperature_bound()
         self._handle_coordinator_update(update=False)
         self.coordinator.async_set_updated_data({})
@@ -424,7 +425,7 @@ class HonClimateEntity(HonEntity, ClimateEntity):
         zone = self._device.settings.get(f"{command}.zone")
         if zone and isinstance(self.entity_description.name, str):
             zone.value = self.entity_description.name.lower()
-        self._device.sync_command(command, "settings")
+        sync_command(self._device, command, "settings")
         self._set_temperature_bound()
         self._attr_preset_mode = preset_mode
         self.coordinator.async_set_updated_data({})

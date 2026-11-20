@@ -18,7 +18,7 @@ from pyhon.parameter.range import HonParameterRange
 
 from .const import DOMAIN
 from .entity import HonEntity
-from .util import unique_entities
+from .util import sync_command, unique_entities
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -259,7 +259,7 @@ class HonNumberEntity(HonEntity, NumberEntity):
         command = self.entity_description.key.split(".")[0]
         await self._device.commands[command].send()
         if command != "settings":
-            self._device.sync_command(command, "settings")
+            sync_command(self._device, command, "settings")
         self.coordinator.async_set_updated_data({})
 
     @callback
